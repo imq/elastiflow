@@ -1,135 +1,90 @@
 # ElastiFlow&trade;
-ElastiFlow&trade; provides network flow data collection and visualization using the Elastic Stack. As of version 2.0.0 it supports Netflow v5/v9, sFlow and IPFIX flow types (1.x versions support only Netflow v5/v9).
 
-![Overview](https://user-images.githubusercontent.com/10326954/35780814-c015a1cc-09e1-11e8-8e7c-770ef279e9d0.png)
+[![patreon](https://user-images.githubusercontent.com/10326954/52966127-c9847680-33a6-11e9-8640-10dd7abc3af0.png)](https://www.patreon.com/elastiflow) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/robcowart) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=ElastiFlow%E2%84%A2%20provides%20Netflow%20v5%2Fv9%2C%20sFlow%20and%20IPFIX%20data%20collection%20and%20visualization%20using%20the%20Elastic%20Stack.&url=https://github.com/robcowart/elastiflow&hashtags=elastiflow,netflow,sflow,ipfix)
+
+> SUPPORTING ElastiFlow&trade; - Today literally 1000s of users leverage ElastiFlow&trade; As a powerful alternative to expensive commercial flow collecting solutions. As its popularity has increased, so has the time commitment necessary to support users and provide further enhancements. If you are one of the organizations who appreciate the value of ElastiFlow&trade;, I would like to ask you to consider becoming a sponsor. The support from sponsors allows me dedicate more time and energy to the project. To become a sponsor, please visit ElastiFlow on [![patreon](https://user-images.githubusercontent.com/10326954/52966127-c9847680-33a6-11e9-8640-10dd7abc3af0.png)](https://www.patreon.com/elastiflow).
+
+ElastiFlow&trade; provides network flow data collection and visualization using the Elastic Stack (Elasticsearch, Logstash and Kibana). It supports Netflow v5/v9, sFlow and IPFIX flow types (1.x versions support only Netflow v5/v9).
+
+![ElastiFlow&trade;](https://user-images.githubusercontent.com/10326954/57181284-fc141a80-6e91-11e9-9ec5-d0864c25a088.png)
 
 I was inspired to create ElastiFlow&trade; following the overwhelmingly positive feedback received to an article I posted on Linkedin... [WTFlow?! Are you really still paying for commercial solutions to collect and analyze network flow data?](https://www.linkedin.com/pulse/wtflow-you-really-still-paying-commercial-solutions-collect-cowart)
 
+## User Testimonials
+
+Organization | Feedback
+--- | ---
+![ESnet](https://user-images.githubusercontent.com/10326954/44616427-b2c5f280-a84f-11e8-8add-1a458bffec68.png) | ***“Right now this is my personal favorite analytics tool. I use it extensively and am always finding a new way to leverage it."***
+![Payback](https://user-images.githubusercontent.com/10326954/44616291-64afef80-a84d-11e8-804f-6537897bfe85.png) | ***"We're using it since two months in our new datacenter and our network admins are very happy and impressed."***
+![Catapult Systems](https://user-images.githubusercontent.com/10326954/44616396-2c111580-a84f-11e8-92dd-a509064d02f8.png) | ***"Of all the netflow tools I’ve tested it has, by far, the best visualizations."***
+![Imagine Software](https://user-images.githubusercontent.com/10326954/44616477-ee14f100-a850-11e8-9133-26917020e685.png) | ***"We absolutely love ElastiFlow and recently stood it up in production. Looking forward to new functionality and dashboards."***
+
 ## Getting Started
-ElastiFlow&trade; is built using the Elastic Stack, including Elasticsearch, Logstash and Kibana. Refer to the following compatibility chart to choose a release of ElastiFlow&trade; that is compatible with the version of the Elastic Stack you are using.
 
-Elastic Stack | ElastiFlow&trade; 1.x | ElastiFlow&trade; 2.x
-:---:|:---:|:---:
-6.2 | &#10003; | &#10003;
-6.1 | &#10003; | &#10003;
-6.0 | &#10003; | &#10003;
-5.6 | &#10003; | &#10003;
-5.5 | &#10003; | 
-5.4 | &#10003; | 
+> NOTE: Elastic Stack 7.x _*requires*_ ElastiFlow&trade; 3.5.x. To deploy on Elastic Stack 6.x you _*must*_ use ElastiFlow&trade; 3.4.2 or earlier. The 3.4 branch will be maintained independently of the master branch for a while, as most users are still using a pre-7 release of the Elastic Stack.
 
-> NOTE: The instructions that follow are for ElastiFlow&trade; 2.x.
+ElastiFlow&trade; is built using the Elastic Stack, including Elasticsearch, Logstash and Kibana. Please refer to [INSTALL.md](https://github.com/robcowart/elastiflow/blob/master/INSTALL.md) for instructions on how to install and configure ElastiFlow&trade;
 
-### Setting up Elasticsearch
-Currently there is no specific configuration required for Elasticsearch. As long as Kibana and Logstash can talk to your Elasticsearch cluster you should be ready to go. At high ingest rates (>10K flows/s), or for data redundancy and high availability, a multi-node cluster is recommended.
 
-### Setting up Logstash
-To use ElastiFlow&trade; you will need to install the community supported sFlow codec for Logtsash. It is also recommended that you always use the latest version of [Netflow](https://www.elastic.co/guide/en/logstash/current/plugins-codecs-netflow.html) codec. This can achieved by running the following commands:
+> NOTE: Please make sure that have reviewed [KNOWN_ISSUES.md](https://github.com/robcowart/elastiflow/blob/master/KNOWN_ISSUES.md) prior to getting started.
 
-```
-$ LS_HOME/bin/logstash-plugin install logstash-codec-sflow
-Validating logstash-codec-sflow
-Installing logstash-codec-sflow
+## Provided Dashboards
 
-$ LS_HOME/bin/logstash-plugin update logstash-codec-netflow
-Updating logstash-codec-netflow
-Updated logstash-codec-netflow 3.10.0 to 3.11.2
-```
-
-There are four sets of configuration files provided within the `logstash/elastiflow` folder:
-```
-logstash
-+-- elastiflow
-    |-- conf.d  (contains the logstash pipeline)
-    |-- dictionaries (yaml files used to enrich raw flow data)
-    |-- geoipdbs  (contains GeoIP databases)
-    +-- templates  (contains index templates)
-```
-
-Copy the `elastiflow` directory to the location of your Logstash configuration files (e.g. on RedHat/CentOS this would be `/etc/logstash/elastiflow`.
-
-Rather than directly editing the pipeline configuration files for your environment, environment variables can be used. The supported environment variables are:
-
-Environment Variable | Description | Default Value
---- | --- | ---
-ELASTIFLOW_GEOIP_DB_PATH | The path where the GeoIP DBs are located | /etc/logstash/geoipdbs
-ELASTIFLOW_DICT_PATH | The path where the dictionary files are located | /etc/logstash/dictionaries
-ELASTIFLOW_TEMPLATE_PATH | The path to where index templates are located | /etc/logstash/templates
-ELASTIFLOW_RESOLVE_IP2HOST | Enable/Disable DNS requests | false
-ELASTIFLOW_NAMESERVER | The DNS server to which the dns filter should send requests | 127.0.0.1
-ELASTIFLOW_KEEP_ORIG_DATA | If set to `false` the original `netflow`, `ipfix` and `sflow` objects will be deleted prior to indexing. This can save disk space without affecting the provided dashboards. However the original flow fields will no longer be available if they are desired for additional analytics. | true
-ELASTIFLOW_ES_HOST | The Elasticsearch host to which the output will send data | 127.0.0.1:9200
-ELASTIFLOW_ES_USER | The password for the connection to Elasticsearch | elastic
-ELASTIFLOW_ES_PASSWD | The username for the connection to Elasticsearch | changeme
-ELASTIFLOW_NETFLOW_HOST | The IP address from which to listen for Netflow messages | 0.0.0.0
-ELASTIFLOW_NETFLOW_PORT | The UDP port on which to listen for Netflow messages | 2055
-ELASTIFLOW_NETFLOW_LASTSW_TIMESTAMP | Enable/Disable setting `@timestamp` with the value of netflow.last_switched | false
-ELASTIFLOW_NETFLOW_TZ | The timezone of netflow.last_switched | UTC
-ELASTIFLOW_SFLOW_HOST | The IP address from which to listen for sFlow messages | 0.0.0.0
-ELASTIFLOW_SFLOW_PORT | The UDP port on which to listen for sFlow messages | 6343
-ELASTIFLOW_IPFIX_TCP_HOST | The IP address from which to listen for IPFIX messages via TCP | 0.0.0.0
-ELASTIFLOW_IPFIX_TCP_PORT | The port on which to listen for IPFIX messages via TCP | 4739
-ELASTIFLOW_IPFIX_UDP_HOST | The IP address from which to listen for IPFIX messages via UDP | 0.0.0.0
-ELASTIFLOW_IPFIX_UDP_PORT | The port on which to listen for IPFIX messages via UDP | 4739
-
-The files `profile.d/elastiflow.sh` and `logstash.service.d/elastiflow.conf` are provided to help you setup the environment variables. For example, if you will be running Logstash using `systemd`, simply complete following steps...
-1. Edit the provided `logstash.service.d/elastiflow.conf` for your environment and needs.
-2. Copy the file to `/etc/systemd/system/logstash.service.d/elastiflow.conf`
-3. Run `systemctl daemon-reload` to pickup the new systemd configuration files
-4. Start Logstash by running `systemctl start logstash`
-
-> WARNING: DNS resolution of IP addresses to hostnames is controlled by the `ELASTIFLOW_RESOLVE_IP2HOST` environment variable. Within the pipeline caching is disabled for the `dns` filter as this causes performance issues due to the blocking nature of the cache lookups. For the best DNS performance it is recommended to use a local `dnsmasq` process to handle caching and to forward any unresolved lookups to upstream DNS servers. This is the reason that `ELASTIFLOW_NAMESERVER` defaults to `127.0.0.1`. When receiving very high rates of flow records, leaving DNS resolution disabled will ensure the best performance.
-
-Logstash can be configured to load the ElastiFlow&trade; pipeline using one of the following methods:
-* From the command line using the path.config option.
-```
-$ LS_HOME/bin/logstash --path.config=/etc/logstash/elastiflow/conf.d
-```
-* By setting path.config in `logstash.yml`
-```
-path.config: /etc/logstash/elastiflow/conf.d
-```
-* If using Logstash 6.0 or above, ElastiFlow&trade; can also be started ba adding it to `pipelines.yml`
-```
-- pipeline.id: elastiflow
-  path.config: "/etc/logstash/elastiflow/conf.d"
-```
-
-### Setting up Kibana
-As of Kibana 5.6 an API (yet undocumented) is available to import and export Index Patterns. The JSON file which contains the Index Pattern configuration is `kibana/elastiflow.index_pattern-json`. To setup the `elastiflow-*` Index Pattern run the following command:
-```
-curl -X POST -u USERNAME:PASSWORD http://KIBANASERVER:5601/api/saved_objects/index-pattern/elastiflow-* -H "Content-Type: application/json" -H "kbn-xsrf: true" -d @/PATH/TO/elastiflow.index_pattern.json
-```
-
-Finally the vizualizations and dashboards can be loaded into Kibana by importing the `elastiflow.dachboards.json` file from within Kibana. This is done from the Management - > Saved Objects page.
-
-## Dashboards
 The following dashboards are provided.
 
 > NOTE: The dashboards are optimized for a monitor resolution of 1920x1080.
 
 ### Overview
-![Overview](https://user-images.githubusercontent.com/10326954/35780648-d4443d1e-09de-11e8-902d-e2c43e072c30.png)
+
+![Overview](https://user-images.githubusercontent.com/10326954/57179336-290a0280-6e7d-11e9-8e34-f4d3f04567f7.png)
 
 ### Top-N
-There are separate Top-N dashboards for Top Talkers, Top Services and Top Conversations.
-![Conversation Partners](https://user-images.githubusercontent.com/10326954/35780668-42c0a1ec-09df-11e8-8e14-363fc1103cc4.png)
 
-### Geo Location
+There are separate Top-N dashboards for Top Talkers, Services, Conversations and Applications.
+![Top-N](https://user-images.githubusercontent.com/10326954/57181182-c02c8580-6e90-11e9-8cc6-b32424566dea.png)
+
+### Threats
+
+ElastiFlow&trade; includes a dictionary of public IP addresses that are known to have a poor reputation. This dictionary is built from many OSINT data sources, normalized to a common taxonomy. The Threats dashboard uses this IP reputation information to highlight three threat/risk types.
+
+1. Public Threats - Public clients with a poor IP reputation that are reaching private addresses.
+2. At-Risk Servers - Private Servers that are being reached by clients with a poor IP reputation.
+3. High-Risk Clients - Private clients that are accessing public servers which have a poor reputation.
+
+![Threats](https://user-images.githubusercontent.com/10326954/57181155-865b7f00-6e90-11e9-82f8-bb8e7b2df083.png)
+
+### Flows
+
+There are separate Sankey dashboards for Client/Server, Source/Destination and Autonomous System perspectives. The sankey visualizations are built using the new Vega visualization plugin.
+![Flows](https://user-images.githubusercontent.com/10326954/57180877-65455f00-6e8d-11e9-9411-ca2b952748e7.png)
+
+### Geo IP
+
 There are separate Geo Loacation dashboards for Client/Server and Source/Destination perspectives.
-![Geo Location](https://user-images.githubusercontent.com/10326954/35780710-d3524bfc-09df-11e8-8d89-2dec29415d19.png)
+![Geo IP](https://user-images.githubusercontent.com/10326954/57180209-cf0e3a80-6e86-11e9-8b7b-acd3a82181af.png)
 
-### Autonomous Systems
+### AS Traffic
+
 Provides a view of traffic to and from Autonomous Systems (public IP ranges)
-![Autonomous Systems](https://user-images.githubusercontent.com/10326954/35780714-e87dd122-09df-11e8-9182-3ad9c9ffaffa.png)
+![AS Traffic](https://user-images.githubusercontent.com/10326954/57180844-17305b80-6e8d-11e9-875e-a715d0c66a25.png)
 
 ### Flow Exporters
-![Flow Exporters](https://user-images.githubusercontent.com/10326954/35780721-ff05a32a-09df-11e8-84ec-43a6213c8719.png)
 
-### Traffic Analysis
-![Traffic Analysis](https://user-images.githubusercontent.com/10326954/35780723-0146284e-09e0-11e8-915a-6b9f5799350a.png)
+![Flow Exporters](https://user-images.githubusercontent.com/10326954/57180767-51e5c400-6e8c-11e9-9c06-6c34ec6ea922.png)
+
+### Traffic Details
+
+![Traffic Details](https://user-images.githubusercontent.com/10326954/57180793-86598000-6e8c-11e9-9dc1-341abafbd20e.png)
 
 ### Flow Records
-![Flow Records](https://user-images.githubusercontent.com/10326954/35780724-03aca108-09e0-11e8-98fe-bff7aa47e338.png)
+
+![Flow Records](https://user-images.githubusercontent.com/10326954/57180815-bf91f000-6e8c-11e9-823d-6fb10d5a9d16.png)
+
+### Ziften ZFlow
+
+ElastiFlow&trade; v3.4.0 added support for IPFIX records from Ziften's ZFlow agent. In addition to being fully integrated with the standard dashboards, a stand-alone ZFlow dashboards displays network traffic based on user and command data provided by ZFlow.
+![Ziften ZFlow](https://user-images.githubusercontent.com/10326954/57181212-0da8f280-6e91-11e9-8725-4e06b22fc64b.png)
 
 ## Attribution
-This product includes GeoLite data created by MaxMind, available from (http://www.maxmind.com)
+
+This product includes GeoLite2 data created by MaxMind, available from (http://www.maxmind.com)

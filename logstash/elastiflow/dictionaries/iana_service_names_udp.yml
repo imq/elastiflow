@@ -1,3 +1,20 @@
+#------------------------------------------------------------------------------
+# Copyright (C)2019 Robert Cowart
+# 
+# The contents of this file and/or repository are subject to the Robert Cowart
+# Public License (the "License") and may not be used or distributed except in
+# compliance with the License. You may obtain a copy of the License at:
+# 
+# http://www.koiossian.com/public/robert_cowart_public_license.txt
+# 
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+# the specific language governing rights and limitations under the License.
+# 
+# The Original Source Code was developed by Robert Cowart. Portions created by
+# Robert Cowart are Copyright (C)2019 Robert Cowart. All Rights Reserved.
+#------------------------------------------------------------------------------
+
 "1": tcpmux
 "2": compressnet
 "3": compressnet
@@ -77,7 +94,7 @@
 "103": gppitnp
 "104": acr-nema
 "105": csnet-ns
-"105": cso
+#"105": cso
 "106": 3com-tsmux
 "107": rtelnet
 "108": snagas
@@ -1640,7 +1657,7 @@
 "1990": stun-p1
 "1991": stun-p2
 "1992": ipsendmsg
-"1992": stun-p3
+#"1992": stun-p3
 "1993": snmp-tcp-port
 "1994": stun-port
 "1995": perf-port
@@ -1703,7 +1720,8 @@
 "2052": clearvisn
 "2053": lot105-ds-upd
 "2054": weblogin
-"2055": iop
+#"2055": iop
+"2055": netflow
 "2056": omnisky
 "2057": rich-cp
 "2058": newwavesearch
